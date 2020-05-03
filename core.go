@@ -12,12 +12,12 @@ import (
 
 type conf struct {
 	Dialect  string `yaml:"dialect"`
-	Host      string `yaml:"host"`
-	Port      string `yaml:"port"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 	Database string `yaml:"database"`
-	Sslmode string `yaml:"sslmode"`
+	Sslmode  string `yaml:"sslmode"`
 }
 
 // Generate directory, and all its necessary files
@@ -30,12 +30,12 @@ func Init(dirname string) {
 
 	c := conf{
 		Dialect:  "postgresql/mysql/mariadb",
-		Host:      "Host of your database",
-		Port:      "Port to use",
+		Host:     "Host of your database",
+		Port:     "Port to use",
 		Database: "Database to be written to",
 		Username: "username to use",
 		Password: "Password of the username",
-		Sslmode: "Whether to use ssl",
+		Sslmode:  "Whether to use ssl",
 	}
 	d, err := yaml.Marshal(&c)
 	if err != nil {
