@@ -3,6 +3,7 @@ package dbm
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -13,12 +14,12 @@ func TestInit(t *testing.T) {
 	defer os.RemoveAll(dirname)
 	Init(dirname)
 
-	_, err := os.Stat(dirname + "/src")
+	_, err := os.Stat(filepath.Join(dirname, "/src"))
 	if err != nil {
 		t.Fatalf(`Failed Creating "src" directory`)
 	}
 
-	_, err = os.Stat(dirname + "/conf.yaml")
+	_, err = os.Stat(filepath.Join(dirname, "/conf.yaml"))
 	if err != nil {
 		t.Fatalf(`Failed Creating "conf.yaml"`)
 	}
@@ -27,7 +28,7 @@ func TestInit(t *testing.T) {
 func TestGenerate(t *testing.T) {
 	dirname := "src"
 	os.Mkdir(dirname, 'd')
-	// defer os.RemoveAll(dirname)
+	defer os.RemoveAll(dirname)
 
 	filename := "CreateTableDummy"
 	Generate(filename)

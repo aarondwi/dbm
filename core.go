@@ -1,6 +1,7 @@
 package dbm
 
 import (
+	"path/filepath"
 	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -20,13 +21,13 @@ type conf struct {
 // Generate directory, and all its necessary files
 // for dbm to use later
 func Init(dirname string) {
-	err := os.MkdirAll(dirname+"/src", 'd')
+	err := os.MkdirAll(filepath.Join(dirname, "src"), 'd')
 	if err != nil {
 		log.Fatalf("Failed generating src directory: %v", err)
 	}
 
 	c := conf{
-		Dialect:  "postgres/mysql/mariadb/mongo",
+		Dialect:  "postgresql/mysql/mariadb",
 		Url:      "connection url to your database",
 		Database: "Database to be written to",
 		Username: "username to use",
@@ -37,7 +38,9 @@ func Init(dirname string) {
 		log.Fatalf("Failed generating conf.yaml content: %v", err)
 	}
 
-	err = ioutil.WriteFile(dirname+"/conf.yaml", []byte(string(d)), 0700)
+	err = ioutil.WriteFile(
+		filepath.Join(dirname, "conf.yaml"), 
+		[]byte(string(d)), 0700)
 	if err != nil {
 		log.Fatalf("Failed creating conf.yaml file: %v", err)
 	}
@@ -67,7 +70,9 @@ func Generate(filename string) {
 		int32(time.Now().Unix()),
 		filename)
 
-	err = ioutil.WriteFile("src/"+filename, []byte(string(d)), 0700)
+	err = ioutil.WriteFile(
+		filepath.Join("src", filename), 
+		[]byte(string(d)), 0700)
 	if err != nil {
 		log.Fatalf("Failed creating conf.yaml file: %v", err)
 	}
