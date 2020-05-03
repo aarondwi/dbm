@@ -16,12 +16,12 @@ func TestInit(t *testing.T) {
 
 	_, err := os.Stat(filepath.Join(dirname, "/src"))
 	if err != nil {
-		t.Fatalf(`Failed Creating "src" directory`)
+		t.Fatalf(`Failed Creating "src" directory: %v`, err)
 	}
 
 	_, err = os.Stat(filepath.Join(dirname, "/conf.yaml"))
 	if err != nil {
-		t.Fatalf(`Failed Creating "conf.yaml"`)
+		t.Fatalf(`Failed Creating "conf.yaml": %v`, err)
 	}
 }
 
@@ -47,6 +47,6 @@ func TestGenerate(t *testing.T) {
 	}
 
 	if !found {
-		t.Fatalf("Failed generating srcfile")
+		t.Fatalf("Failed generating srcfile: %v", err)
 	}
 }
