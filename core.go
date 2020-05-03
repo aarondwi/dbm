@@ -1,10 +1,12 @@
 package dbm
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 type conf struct {
@@ -41,4 +43,32 @@ func Init(dirname string) {
 	}
 
 	log.Println("Successfully generate dbm directory")
+}
+
+type srcfile struct {
+	Up   string `yaml:"up"`
+	Down string `yaml:"down"`
+}
+
+// Creates a yaml file, that includes generated Up and Down attributes
+// Expected to be called on the same level as "src/" folder
+func Generate(filename string) {
+	s := srcfile{
+		Up:   "Add feature, such as table, index, etc",
+		Down: `To retract the result of "Up"`,
+	}
+	d, err := yaml.Marshal(&s)
+	if err != nil {
+		log.Fatalf("Failed generating srcfile %s: %v", filename, err)
+	}
+
+	filename = fmt.Sprintf(
+		"%d-%s.yaml",
+		int32(time.Now().Unix()),
+		filename)
+
+	err = ioutil.WriteFile("src/"+filename, []byte(string(d)), 0700)
+	if err != nil {
+		log.Fatalf("Failed creating conf.yaml file: %v", err)
+	}
 }
