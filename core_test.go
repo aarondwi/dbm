@@ -37,7 +37,7 @@ func TestGenerate(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
+
 	found := false
 	for _, f := range files {
 		if strings.Contains(f.Name(), filename) {
