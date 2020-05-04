@@ -1,6 +1,7 @@
-package dbm
+package filehandler
 
 import (
+	"dbm/schema"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,13 +11,6 @@ import (
 
 	"gopkg.in/yaml.v2"
 )
-
-// Srcfile is the format of the source file
-// in which the user will fill with `up` and `down` quereis
-type Srcfile struct {
-	Up   string `yaml:"up"`
-	Down string `yaml:"down"`
-}
 
 // Source is the one and only implementation
 // for SourceFormat interface
@@ -33,7 +27,7 @@ func (source *Source) GenerateDirectory(dirname string) error {
 		return err
 	}
 
-	c := &Conf{
+	c := &schema.Conf{
 		Dialect:  "postgresql/mysql/mariadb",
 		Host:     "Host of your database",
 		Port:     5432,
@@ -75,14 +69,14 @@ func (source *Source) ReadFromSrcDir() ([]string, error) {
 // ReadSrcfileContent reads the yaml file specified by filename
 // umarshal the yaml and returns the Srcfile structs
 // taken from https://stackoverflow.com/questions/30947534/how-to-read-a-yaml-file
-func (source *Source) ReadSrcfileContent(filename string) (*Srcfile, error) {
+func (source *Source) ReadSrcfileContent(filename string) (*schema.Srcfile, error) {
 	yamlFile, err := ioutil.ReadFile(filepath.Join("src", filename))
 	if err != nil {
 		log.Printf("Failed read %s: %v", filename, err)
 		return nil, err
 	}
 
-	s := &Srcfile{}
+	s := &schema.Srcfile{}
 	err = yaml.Unmarshal(yamlFile, s)
 	if err != nil {
 		log.Fatalf("Failed Unmarshalling %s: %v", filename, err)
@@ -95,7 +89,7 @@ func (source *Source) ReadSrcfileContent(filename string) (*Srcfile, error) {
 // GenerateSrcfile creates skeleton file
 // that user can fill later with `up` and `down` queries
 func (source *Source) GenerateSrcfile(filename string) error {
-	s := &Srcfile{
+	s := &schema.Srcfile{
 		Up:   "Add feature, such as table, index, etc",
 		Down: `To retract the result of "Up"`,
 	}

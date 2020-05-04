@@ -1,7 +1,8 @@
-package dbm
+package connector
 
 import (
 	"database/sql"
+	"dbm/schema"
 	"fmt"
 	"log"
 	"strings"
@@ -17,7 +18,7 @@ type DbPostgres struct {
 }
 
 // Init creates the connection for target DB
-func (d *DbPostgres) Init(conf Conf) {
+func (d *DbPostgres) Init(conf schema.Conf) {
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		conf.Host, conf.Port,

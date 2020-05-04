@@ -1,4 +1,4 @@
-package dbm
+package schema
 
 // Conf is the config to be passed
 // to whatever database used

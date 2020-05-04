@@ -1,6 +1,7 @@
-package dbm
+package filehandler
 
 import (
+	"dbm/schema"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -61,7 +62,7 @@ func TestReadSrcfileContent(t *testing.T) {
 	os.Mkdir(dirname, 'd')
 	defer os.RemoveAll(dirname)
 
-	s := &Srcfile{
+	s := &schema.Srcfile{
 		Up:   "hello",
 		Down: "World",
 	}
@@ -75,7 +76,7 @@ func TestReadSrcfileContent(t *testing.T) {
 		t.Fatalf("Failed generating mock src file: %v", err)
 	}
 
-	result := &Srcfile{}
+	result := &schema.Srcfile{}
 	result, err = source.ReadSrcfileContent(filename)
 	if err != nil {
 		t.Fatalf("Failed generating srcfile content: %v", err)
@@ -96,7 +97,7 @@ func TestReadFromSrcDir(t *testing.T) {
 	os.Mkdir(dirname, 'd')
 	defer os.RemoveAll(dirname)
 
-	s := &Srcfile{
+	s := &schema.Srcfile{
 		Up:   "hello",
 		Down: "World",
 	}

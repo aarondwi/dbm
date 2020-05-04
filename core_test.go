@@ -1,4 +1,4 @@
-package dbm
+package main
 
 import (
 	"io/ioutil"
@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 )
+
+var dbMock DummyDB
 
 func TestInit(t *testing.T) {
 	dirname := "test"
@@ -49,4 +51,12 @@ func TestGenerate(t *testing.T) {
 	if !found {
 		t.Fatalf("Failed generating srcfile: %v", err)
 	}
+}
+
+func TestUp(t *testing.T) {
+
+}
+
+func TestDown(t *testing.T) {
+
 }

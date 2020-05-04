@@ -1,4 +1,8 @@
-package dbm
+package filehandler
+
+import (
+	"dbm/schema"
+)
 
 // SourceFormat is the main interface
 // for OS R/W operation
@@ -6,6 +10,6 @@ package dbm
 type SourceFormat interface {
 	GenerateDirectory(dirname string) error
 	GenerateSrcfile(filename string) error
-	ReadSrcfileContent(filename string) (*Srcfile, error)
+	ReadSrcfileContent(filename string) (*schema.Srcfile, error)
 	ReadFromSrcDir() ([]string, error)
 }
