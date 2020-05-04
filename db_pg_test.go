@@ -7,7 +7,7 @@ import (
 
 var db DbPostgres
 
-func TestMain(m *testing.M) {
+func testSetupAndTeardown(m *testing.M) int {
 	conf := DbPostgresConfig{
 		Host:     "127.0.0.1",
 		Port:     5432,
@@ -17,9 +17,11 @@ func TestMain(m *testing.M) {
 		Sslmode:  "disable",
 	}
 	db.Init(conf)
-	code := m.Run()
-	db.Close()
-	os.Exit(code)
+	defer db.Close()
+	return m.Run()
+}
+func TestMain(m *testing.M) {
+	os.Exit(testSetupAndTeardown(m))
 }
 
 func TestCreateAndDropLogTable(t *testing.T) {
@@ -69,5 +71,12 @@ func TestInsertAndListAndDeleteLogs(t *testing.T) {
 	err = db.DropLogTable()
 	if err != nil {
 		t.Fatalf("Failed Dropping dbm_logs: %v", err)
+	}
+}
+
+func TestBlindExec(t *testing.T) {
+	err := db.BlindExec("SELECT 1+1")
+	if err != nil {
+		t.Fatalf("Failed Executing Blindly: %v", err)
 	}
 }

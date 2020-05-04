@@ -36,6 +36,14 @@ func (d *DbPostgres) Init(conf DbPostgresConfig) {
 
 	d.db = db
 }
+func (d *DbPostgres) BlindExec(stmt string) error {
+	_, err := d.db.Exec(stmt)
+	if err != nil {
+		log.Fatalf("Failed executing BlindExec: %v", err)
+		return err
+	}
+	return nil
+}
 func (d *DbPostgres) CreateLogTable() error {
 	_, err := d.db.Exec(`
 		CREATE TABLE dbm_logs (
@@ -68,8 +76,8 @@ func (d *DbPostgres) InsertLogs(filenames []string) error {
 		args[i] = s
 		c += 1
 	}
-	
-	stmt := "INSERT INTO dbm_logs(filename) VALUES " + 
+
+	stmt := "INSERT INTO dbm_logs(filename) VALUES " +
 		strings.Join(params, ",")
 	_, err := d.db.Exec(stmt, args...)
 	if err != nil {
@@ -89,7 +97,7 @@ func (d *DbPostgres) DeleteLogs(filenames []string) error {
 		c += 1
 	}
 
-	stmt := "DELETE FROM dbm_logs WHERE filename IN ( " + 
+	stmt := "DELETE FROM dbm_logs WHERE filename IN ( " +
 		strings.Join(params, ",") + ")"
 	_, err := d.db.Exec(stmt, args...)
 	if err != nil {
