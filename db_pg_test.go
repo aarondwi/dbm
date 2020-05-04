@@ -8,7 +8,8 @@ import (
 var db DbPostgres
 
 func testSetupAndTeardown(m *testing.M) int {
-	conf := DbPostgresConfig{
+	conf := Conf{
+		Dialect:  "postgres",
 		Host:     "127.0.0.1",
 		Port:     5432,
 		Username: "dbm",

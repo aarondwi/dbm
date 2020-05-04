@@ -9,20 +9,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type DbPostgresConfig struct {
-	Host     string
-	Port     int16
-	Username string
-	Password string
-	Database string
-	Sslmode  string
-}
-
 type DbPostgres struct {
 	db *sql.DB
 }
 
-func (d *DbPostgres) Init(conf DbPostgresConfig) {
+func (d *DbPostgres) Init(conf Conf) {
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		conf.Host, conf.Port,
