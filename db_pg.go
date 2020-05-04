@@ -6,13 +6,17 @@ import (
 	"log"
 	"strings"
 
+	// this module directly use postgres
 	_ "github.com/lib/pq"
 )
 
+// DbPostgres is the implementation
+// of DbAccess interface for postgres
 type DbPostgres struct {
 	db *sql.DB
 }
 
+// Init creates the connection for target DB
 func (d *DbPostgres) Init(conf Conf) {
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
@@ -27,6 +31,11 @@ func (d *DbPostgres) Init(conf Conf) {
 
 	d.db = db
 }
+
+// BlindExec blindly executes (shocking, right?)
+// the query in the files
+// this is the EXPECTED behavior, as we want to allow people to
+// write it in their database dialect directly
 func (d *DbPostgres) BlindExec(stmt string) error {
 	_, err := d.db.Exec(stmt)
 	if err != nil {
@@ -35,6 +44,10 @@ func (d *DbPostgres) BlindExec(stmt string) error {
 	}
 	return nil
 }
+
+// CreateLogTable generates the table
+// to store logs in the database
+// it will be named dbm_logs
 func (d *DbPostgres) CreateLogTable() error {
 	_, err := d.db.Exec(`
 		CREATE TABLE dbm_logs (
@@ -49,6 +62,7 @@ func (d *DbPostgres) CreateLogTable() error {
 	return nil
 }
 
+// DropLogTable removes dbm_logs table
 func (d *DbPostgres) DropLogTable() error {
 	_, err := d.db.Exec(`DROP TABLE dbm_logs`)
 	if err != nil {
@@ -58,6 +72,7 @@ func (d *DbPostgres) DropLogTable() error {
 	return nil
 }
 
+// InsertLogs adds the filenames to dbm_logs table
 func (d *DbPostgres) InsertLogs(filenames []string) error {
 	params := make([]string, len(filenames))
 	args := make([]interface{}, len(filenames))
@@ -65,7 +80,7 @@ func (d *DbPostgres) InsertLogs(filenames []string) error {
 	for i, s := range filenames {
 		params[i] = fmt.Sprintf("($%d)", c)
 		args[i] = s
-		c += 1
+		c++
 	}
 
 	stmt := "INSERT INTO dbm_logs(filename) VALUES " +
@@ -78,6 +93,7 @@ func (d *DbPostgres) InsertLogs(filenames []string) error {
 	return nil
 }
 
+// DeleteLog removes the filename from the dbm_logs table
 func (d *DbPostgres) DeleteLog(filename string) error {
 	stmt := "DELETE FROM dbm_logs WHERE filename = $1"
 	_, err := d.db.Exec(stmt, filename)
@@ -88,6 +104,7 @@ func (d *DbPostgres) DeleteLog(filename string) error {
 	return nil
 }
 
+// GetLastLog retrieves the last log from dbm_logs table
 func (d *DbPostgres) GetLastLog() (string, error) {
 	var filename string
 	err := d.db.QueryRow(`SELECT filename FROM dbm_logs ORDER BY filename DESC LIMIT 1`).Scan(&filename)
@@ -98,6 +115,8 @@ func (d *DbPostgres) GetLastLog() (string, error) {
 	return filename, nil
 }
 
+// ListAlreadyUp retrieves all filenames in dbm_logs table
+// filenames listed here mean those that has been applied to the database
 func (d *DbPostgres) ListAlreadyUp() ([]string, error) {
 	rows, err := d.db.Query(`SELECT filename FROM dbm_logs ORDER BY filename`)
 	if err != nil {
@@ -114,6 +133,7 @@ func (d *DbPostgres) ListAlreadyUp() ([]string, error) {
 	return result, nil
 }
 
+// Close the connection to the database
 func (d *DbPostgres) Close() {
 	d.db.Close()
 }
