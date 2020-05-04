@@ -87,24 +87,24 @@ func (d *DbPostgres) InsertLogs(filenames []string) error {
 	return nil
 }
 
-func (d *DbPostgres) DeleteLogs(filenames []string) error {
-	params := make([]string, len(filenames))
-	args := make([]interface{}, len(filenames))
-	c := 1
-	for i, s := range filenames {
-		params[i] = fmt.Sprintf("$%d", c)
-		args[i] = s
-		c += 1
-	}
-
-	stmt := "DELETE FROM dbm_logs WHERE filename IN ( " +
-		strings.Join(params, ",") + ")"
-	_, err := d.db.Exec(stmt, args...)
+func (d *DbPostgres) DeleteLog(filename string) error {
+	stmt := "DELETE FROM dbm_logs WHERE filename = $1"
+	_, err := d.db.Exec(stmt, filename)
 	if err != nil {
-		log.Fatalf("Failed deleting dbm_logs: %v", err)
+		log.Fatalf("Failed deleting %s from dbm_logs: %v", filename, err)
 		return err
 	}
 	return nil
+}
+
+func (d *DbPostgres) GetLastLog() (string, error) {
+	var filename string
+	err := d.db.QueryRow(`SELECT filename FROM dbm_logs ORDER BY filename DESC LIMIT 1`).Scan(&filename)
+	if err != nil {
+		log.Fatalf("Failed retrieving from dbm_logs: %v", err)
+		return "", err
+	}
+	return filename, nil
 }
 
 func (d *DbPostgres) ListAlreadyUp() ([]string, error) {

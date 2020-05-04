@@ -36,13 +36,11 @@ func TestCreateAndDropLogTable(t *testing.T) {
 }
 
 func TestInsertAndListAndDeleteLogs(t *testing.T) {
-	err := db.CreateLogTable()
-	if err != nil {
-		t.Fatalf("Failed Creating dbm_logs: %v", err)
-	}
+	db.CreateLogTable()
+	defer db.DropLogTable()
 
-	filenames := []string{"file'1", "file2", "fi'le3", "file4", "file5"}
-	err = db.InsertLogs(filenames)
+	filenames := []string{"file1", "file2", "file3", "file4", "file5"}
+	err := db.InsertLogs(filenames)
 	if err != nil {
 		t.Fatalf("Failed inserting into dbm_logs: %v", err)
 	}
@@ -55,22 +53,26 @@ func TestInsertAndListAndDeleteLogs(t *testing.T) {
 		t.Fatalf("Inserted and Retrieved Data Mismatch: %v", err)
 	}
 
-	err = db.DeleteLogs(filenames)
+	var res string
+	res, error = db.GetLastLog()
+	if error != nil {
+		t.Fatalf("Failed retrieving last log from dbm_logs: %v", err)
+	}
+	if res != filenames[len(filenames)-1] {
+		t.Fatalf("Inserted and Retrieved Data Mismatch: %v", err)
+	}
+
+	err = db.DeleteLog(filenames[len(filenames)-1])
 	if err != nil {
 		t.Fatalf("Failed deleting from dbm_logs: %v", err)
 	}
 
 	result, error = db.ListAlreadyUp()
 	if error != nil {
-		t.Fatalf("Failed retrieving logs from dbm_logs: %v", err)
+		t.Fatalf("Failed retrieving logs from dbm_logs: %v", error)
 	}
-	if len(result) != 0 {
-		t.Fatalf("Inserted and Retrieved Data Mismatch: %v", err)
-	}
-
-	err = db.DropLogTable()
-	if err != nil {
-		t.Fatalf("Failed Dropping dbm_logs: %v", err)
+	if len(result) != len(filenames)-1 {
+		t.Fatalf("Inserted and Retrieved Data Mismatch: %v", error)
 	}
 }
 
