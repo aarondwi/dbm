@@ -1,2 +1,2 @@
-1. separate reading/writing yaml and the content from core
-2. split dbm, and os read/write to separate child package
+1. increase coverage with testing the err path
+2. use CI build tools (probably travis)
