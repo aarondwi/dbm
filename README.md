@@ -1,5 +1,5 @@
 # dbm
-ORM-style database migration tools, minus the ORM bloats
+ORM-style database-schema migration tools, minus the ORM bloats
 
 Why?
 --------------------------

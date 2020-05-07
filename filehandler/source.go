@@ -23,7 +23,7 @@ type Source struct{}
 func (source *Source) GenerateDirectory(dirname string) error {
 	err := os.MkdirAll(filepath.Join(dirname, "src"), 'd')
 	if err != nil {
-		log.Fatalf("Failed generating src directory: %v", err)
+		log.Printf("Failed generating src directory: %v", err)
 		return err
 	}
 
@@ -42,7 +42,7 @@ func (source *Source) GenerateDirectory(dirname string) error {
 		filepath.Join(dirname, "conf.yaml"),
 		[]byte(string(d)), 0700)
 	if err != nil {
-		log.Fatalf("Failed creating conf.yaml file: %v", err)
+		log.Printf("Failed creating conf.yaml file: %v", err)
 		return err
 	}
 
@@ -54,7 +54,7 @@ func (source *Source) GenerateDirectory(dirname string) error {
 func (source *Source) ReadFromSrcDir() ([]string, error) {
 	files, err := ioutil.ReadDir("src")
 	if err != nil {
-		log.Fatalf("Failed reading from src directory: %v", err)
+		log.Printf("Failed reading from src directory: %v", err)
 		return nil, err
 	}
 
@@ -79,7 +79,7 @@ func (source *Source) ReadSrcfileContent(filename string) (*schema.Srcfile, erro
 	s := &schema.Srcfile{}
 	err = yaml.Unmarshal(yamlFile, s)
 	if err != nil {
-		log.Fatalf("Failed Unmarshalling %s: %v", filename, err)
+		log.Printf("Failed Unmarshalling %s: %v", filename, err)
 		return nil, err
 	}
 
@@ -101,7 +101,7 @@ func (source *Source) GenerateSrcfile(filename string) error {
 	err := ioutil.WriteFile(filepath.Join("src", filename),
 		[]byte(string(d)), 0700)
 	if err != nil {
-		log.Fatalf("Failed creating conf.yaml file: %v", err)
+		log.Printf("Failed creating conf.yaml file: %v", err)
 		return err
 	}
 	return nil
