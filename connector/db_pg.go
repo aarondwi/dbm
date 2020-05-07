@@ -18,19 +18,25 @@ type DbPostgres struct {
 }
 
 // Init creates the connection for target DB
-func (d *DbPostgres) Init(conf schema.Conf) {
+func (d *DbPostgres) Init(conf schema.Conf) error {
 	psqlInfo := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		conf.Host, conf.Port,
 		conf.Username, conf.Password,
 		conf.Database, conf.Sslmode,
 	)
-	db, err := sql.Open("postgres", psqlInfo)
+	// we silent the error
+	// because either way it won't throw database error
+	// see https://github.com/lib/pq/issues/581
+	db, _ := sql.Open("postgres", psqlInfo)
+	err := db.Ping()
 	if err != nil {
-		log.Fatalf("Failed creating connection: %v", err)
+		log.Printf("Failed creating connection: %v", err)
+		return err
 	}
 
 	d.db = db
+	return nil
 }
 
 // BlindExec blindly executes (shocking, right?)
@@ -40,7 +46,7 @@ func (d *DbPostgres) Init(conf schema.Conf) {
 func (d *DbPostgres) BlindExec(stmt string) error {
 	_, err := d.db.Exec(stmt)
 	if err != nil {
-		log.Fatalf("Failed executing BlindExec: %v", err)
+		log.Printf("Failed executing BlindExec: %v", err)
 		return err
 	}
 	return nil
@@ -57,7 +63,7 @@ func (d *DbPostgres) CreateLogTable() error {
 		)
 	`)
 	if err != nil {
-		log.Fatalf("Failed creating table dbm_logs: %v", err)
+		log.Printf("Failed creating table dbm_logs: %v", err)
 		return err
 	}
 	return nil
@@ -67,7 +73,7 @@ func (d *DbPostgres) CreateLogTable() error {
 func (d *DbPostgres) DropLogTable() error {
 	_, err := d.db.Exec(`DROP TABLE dbm_logs`)
 	if err != nil {
-		log.Fatalf("Failed dropping table dbm_logs: %v", err)
+		log.Printf("Failed dropping table dbm_logs: %v", err)
 		return err
 	}
 	return nil
@@ -88,7 +94,7 @@ func (d *DbPostgres) InsertLogs(filenames []string) error {
 		strings.Join(params, ",")
 	_, err := d.db.Exec(stmt, args...)
 	if err != nil {
-		log.Fatalf("Failed inserting into dbm_logs: %v", err)
+		log.Printf("Failed inserting into dbm_logs: %v", err)
 		return err
 	}
 	return nil
@@ -99,7 +105,7 @@ func (d *DbPostgres) DeleteLog(filename string) error {
 	stmt := "DELETE FROM dbm_logs WHERE filename = $1"
 	_, err := d.db.Exec(stmt, filename)
 	if err != nil {
-		log.Fatalf("Failed deleting %s from dbm_logs: %v", filename, err)
+		log.Printf("Failed deleting %s from dbm_logs: %v", filename, err)
 		return err
 	}
 	return nil
@@ -110,7 +116,7 @@ func (d *DbPostgres) GetLastLog() (string, error) {
 	var filename string
 	err := d.db.QueryRow(`SELECT filename FROM dbm_logs ORDER BY filename DESC LIMIT 1`).Scan(&filename)
 	if err != nil {
-		log.Fatalf("Failed retrieving from dbm_logs: %v", err)
+		log.Printf("Failed retrieving from dbm_logs: %v", err)
 		return "", err
 	}
 	return filename, nil
@@ -121,11 +127,13 @@ func (d *DbPostgres) GetLastLog() (string, error) {
 func (d *DbPostgres) ListAlreadyUp() ([]string, error) {
 	rows, err := d.db.Query(`SELECT filename FROM dbm_logs ORDER BY filename`)
 	if err != nil {
-		log.Fatalf("Failed retrieving dbm_logs: %v", err)
+		log.Printf("Failed retrieving dbm_logs: %v", err)
+		return nil, err
 	}
 	var result []string
 	for rows.Next() {
 		var filename string
+		rows.Scan(&filename)
 		if err := rows.Scan(&filename); err != nil {
 			return nil, err
 		}

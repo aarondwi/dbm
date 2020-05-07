@@ -26,6 +26,23 @@ func TestMain(m *testing.M) {
 	os.Exit(testSetupAndTeardown(m))
 }
 
+func TestFailedConnection(t *testing.T) {
+	var dbTest DbPostgres
+	confTest := schema.Conf{
+		Dialect:  "postgres",
+		Host:     "127.0.10.10",
+		Port:     5432,
+		Username: "notxist",
+		Password: "notxist",
+		Database: "notxist",
+		Sslmode:  "notxist",
+	}
+	err := dbTest.Init(confTest)
+	if err == nil {
+		t.Fatalf("Should fail creating connection, but it is not")
+	}
+}
+
 func TestCreateAndDropLogTable(t *testing.T) {
 	err := db.CreateLogTable()
 	if err != nil {
@@ -35,6 +52,19 @@ func TestCreateAndDropLogTable(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed Dropping dbm_logs: %v", err)
 	}
+}
+
+func TestCreateAndDropLogTableFailed(t *testing.T) {
+	err := db.DropLogTable()
+	if err == nil {
+		t.Fatal("Should fail dropping dbm_logs, but it is not")
+	}
+	db.CreateLogTable()
+	err = db.CreateLogTable()
+	if err == nil {
+		t.Fatalf("Should fail creating dbm_logs, but it is not")
+	}
+	db.DropLogTable()
 }
 
 func TestInsertAndListAndDeleteLogs(t *testing.T) {
@@ -78,9 +108,40 @@ func TestInsertAndListAndDeleteLogs(t *testing.T) {
 	}
 }
 
+func TestInsertAndListAndDeleteLogsFailed(t *testing.T) {
+	filenames := []string{"file1", "file2", "file3", "file4", "file5"}
+
+	err := db.InsertLogs(filenames)
+	if err == nil {
+		t.Fatalf("It should fail inserting but it is not")
+	}
+
+	_, error := db.ListAlreadyUp()
+	if error == nil {
+		t.Fatalf("It should fail listing but it is not")
+	}
+
+	_, error = db.GetLastLog()
+	if error == nil {
+		t.Fatalf("It should fail retrieving last log but it is not")
+	}
+
+	err = db.DeleteLog("random string")
+	if err == nil {
+		t.Fatalf("It should fail deleting but it is not")
+	}
+}
+
 func TestBlindExec(t *testing.T) {
 	err := db.BlindExec("SELECT 1+1")
 	if err != nil {
 		t.Fatalf("Failed Executing Blindly: %v", err)
+	}
+}
+
+func TestBlindExecFailed(t *testing.T) {
+	err := db.BlindExec("SELECT 1+'halo'")
+	if err == nil {
+		t.Fatalf("BlindExec should fail but it is not")
 	}
 }
