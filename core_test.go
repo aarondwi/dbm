@@ -8,6 +8,7 @@ var dbMock = &dummyDB{}
 var dbMockFail = &dummyDBFail{}
 var sourceMock = &dummySource{}
 var sourceMockFail = &dummySourceFail{}
+var sourceMockFailOnReadSrc = &dummySourceFailOnReadSrc{}
 
 func TestInit(t *testing.T) {
 	dirname := "test"
@@ -91,6 +92,16 @@ func TestUp(t *testing.T) {
 	}
 
 	err = Up(sourceMock, dbMockFail, "")
+	if err == nil {
+		t.Fatal("TestUp should fail because can't read log from db, but it is not")
+	}
+
+	err = Up(sourceMockFailOnReadSrc, dbMock, "")
+	if err == nil {
+		t.Fatal("TestUp should fail because can't read log from db, but it is not")
+	}
+
+	err = Up(sourceMockFailOnReadSrc, dbMock, "anotherfile")
 	if err == nil {
 		t.Fatal("TestUp should fail because can't read log from db, but it is not")
 	}
