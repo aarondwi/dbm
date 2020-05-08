@@ -16,9 +16,9 @@ func (d *dummyDB) InsertLogs(filenames []string) error {
 	return nil
 }
 func (d *dummyDB) DeleteLog(filename string) error { return nil }
-func (d *dummyDB) GetLastLog() (string, error)     { return "LastLog", nil }
+func (d *dummyDB) GetLastLog() (string, error)     { return "somefile", nil }
 func (d *dummyDB) ListAlreadyUp() ([]string, error) {
-	return []string{"FirstLog", "MiddleLog", "LastLog"}, nil
+	return []string{"somefile"}, nil
 }
 func (d *dummyDB) Close() {}
 

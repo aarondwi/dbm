@@ -16,7 +16,7 @@ func (d *dummySource) ReadSrcfileContent(filename string) (*schema.Srcfile, erro
 	}, nil
 }
 func (d *dummySource) ReadFromSrcDir() ([]string, error) {
-	return []string{"suatufile"}, nil
+	return []string{"somefile", "anotherfile"}, nil
 }
 
 type dummySourceFail struct{}

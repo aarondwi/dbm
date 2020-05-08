@@ -3,11 +3,8 @@ package main
 import (
 	"dbm/connector"
 	"dbm/filehandler"
-	"dbm/schema"
-	"io/ioutil"
+	"errors"
 	"log"
-
-	"gopkg.in/yaml.v2"
 )
 
 // Init generates directory, and all its necessary files
@@ -31,7 +28,6 @@ func GenerateSrcfile(sf filehandler.SourceFormat, filename string) error {
 		log.Printf("Failed Generating src file: %v", err)
 		return err
 	}
-
 	return nil
 }
 
@@ -82,93 +78,75 @@ func Status(sf filehandler.SourceFormat, db connector.DbAccess) error {
 	return nil
 }
 
-// taken from
-// https://stackoverflow.com/questions/30947534/how-to-read-a-yaml-file
-func readYamlFileFromSrcDir(filename string) (*schema.Srcfile, error) {
-	yamlFile, err := ioutil.ReadFile(filename)
-	if err != nil {
-		log.Printf("Failed read %s: %v", filename, err)
-		return nil, err
-	}
-
-	s := &schema.Srcfile{}
-	err = yaml.Unmarshal(yamlFile, s)
-	if err != nil {
-		log.Printf("Failed Unmarshalling %s: %v", filename, err)
-		return nil, err
-	}
-
-	return s, nil
-}
-
 // Up applies one or more additions to database
 // if want to apply all notYetUp, pass empty string to filename
-func Up(db connector.DbAccess, filename string) {
-	files, err := ioutil.ReadDir("src")
+func Up(sf filehandler.SourceFormat, db connector.DbAccess, filename string) error {
+	files, err := sf.ReadFromSrcDir()
 	if err != nil {
-		log.Printf("Failed reading src directory: %v", err)
-		return
+		return err
 	}
 
 	alreadyUp, err := db.ListAlreadyUp()
 	if err != nil {
-		log.Printf("Failed retrieving logs from db: %v", err)
-		return
+		return err
 	}
 
 	var notYetUp []string
 	for _, f := range files {
-		if !stringInSlice(f.Name(), alreadyUp) {
-			notYetUp = append(notYetUp, f.Name())
+		if !stringInSlice(f, alreadyUp) {
+			notYetUp = append(notYetUp, f)
 		}
 	}
 
 	if filename == "" {
 		for _, nyu := range notYetUp {
-			s, err := readYamlFileFromSrcDir(nyu)
+			s, err := sf.ReadSrcfileContent(nyu)
 			if err != nil {
-				return
+				return err
 			}
 			db.BlindExec(s.Up)
 		}
 		db.InsertLogs(notYetUp)
+	} else if stringInSlice(filename, alreadyUp) {
+		return errors.New("file is already applied")
 	} else if stringInSlice(filename, notYetUp) {
-		s, err := readYamlFileFromSrcDir(filename)
+		s, err := sf.ReadSrcfileContent(filename)
 		if err != nil {
-			return
+			return err
 		}
 		db.BlindExec(s.Up)
 		db.InsertLogs([]string{filename})
 	} else {
-		log.Printf("File not found: %v", err)
+		return errors.New("file not found")
 	}
+	return nil
 }
 
 // Down remove one addition to database
 // different from Up, Down without empty filename only deletes one latest from logs
-func Down(db connector.DbAccess, filename string) {
+func Down(sf filehandler.SourceFormat, db connector.DbAccess, filename string) error {
 	alreadyUp, err := db.ListAlreadyUp()
 	if err != nil {
-		log.Printf("Failed retrieving logs from db: %v", err)
-		return
+		return err
 	}
 
 	if filename == "" {
 		targetFilename, err := db.GetLastLog()
-		s, err := readYamlFileFromSrcDir(targetFilename)
+		s, err := sf.ReadSrcfileContent(targetFilename)
 		if err != nil {
-			return
+			return err
 		}
 		db.BlindExec(s.Down)
 		db.DeleteLog(filename)
 	} else if stringInSlice(filename, alreadyUp) {
-		s, err := readYamlFileFromSrcDir(filename)
+		s, err := sf.ReadSrcfileContent(filename)
 		if err != nil {
-			return
+			return err
 		}
 		db.BlindExec(s.Down)
 		db.DeleteLog(filename)
 	} else {
-		log.Printf("File not found in logs: %v", err)
+		return errors.New("file not found in dbm_logs")
 	}
+	return nil
 }
