@@ -1,2 +1,2 @@
-1. increase coverage with testing the err path
-2. use CI build tools (probably travis)
+1. use CI build tools (probably travis)
+2. specify more specific error message for file error

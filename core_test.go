@@ -1,55 +1,78 @@
 package main
 
 import (
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 	"testing"
 )
 
-var dbMock DummyDB
+var dbMock = &dummyDB{}
+var dbMockFail = &dummyDBFail{}
+var sourceMock = &dummySource{}
+var sourceMockFail = &dummySourceFail{}
 
 func TestInit(t *testing.T) {
 	dirname := "test"
-	os.Mkdir(dirname, 'd')
-	defer os.RemoveAll(dirname)
-	Init(dirname)
-
-	_, err := os.Stat(filepath.Join(dirname, "/src"))
+	err := Init(sourceMock, dirname)
 	if err != nil {
-		t.Fatalf(`Failed Creating "src" directory: %v`, err)
-	}
-
-	_, err = os.Stat(filepath.Join(dirname, "/conf.yaml"))
-	if err != nil {
-		t.Fatalf(`Failed Creating "conf.yaml": %v`, err)
+		t.Fatalf(`Init function failed: %v`, err)
 	}
 }
 
-func TestGenerate(t *testing.T) {
-	dirname := "src"
-	os.Mkdir(dirname, 'd')
-	defer os.RemoveAll(dirname)
+func TestInitFail(t *testing.T) {
+	dirname := "test"
+	err := Init(sourceMockFail, dirname)
+	if err == nil {
+		t.Fatal(`Init function should fail but it is not`)
+	}
+}
 
+func TestGenerateSrcfile(t *testing.T) {
 	filename := "CreateTableDummy"
-	Generate(filename)
-
-	files, err := ioutil.ReadDir("src")
+	err := GenerateSrcfile(sourceMock, filename)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("GenerateSrcfile failed: %v", err)
 	}
+}
 
-	found := false
-	for _, f := range files {
-		if strings.Contains(f.Name(), filename) {
-			found = true
-			break
-		}
+func TestGenerateSrcfileFail(t *testing.T) {
+	filename := "CreateTableDummy"
+	err := GenerateSrcfile(sourceMockFail, filename)
+	if err == nil {
+		t.Fatal(`GenerateSrcfile function should fail but it is not`)
 	}
+}
 
-	if !found {
-		t.Fatalf("Failed generating srcfile: %v", err)
+func TestSetup(t *testing.T) {
+	err := Setup(dbMock)
+	if err != nil {
+		t.Fatalf("CreateLogTable failed: %v", err)
+	}
+}
+
+func TestSetupFail(t *testing.T) {
+	err := Setup(dbMockFail)
+	if err == nil {
+		t.Fatal(`TestSetupFail function should fail but it is not`)
+	}
+}
+
+func TestStatus(t *testing.T) {
+	err := Status(sourceMock, dbMock)
+	if err != nil {
+		t.Fatalf("Status failed: %v", err)
+	}
+}
+
+func TestStatusReadDirFail(t *testing.T) {
+	err := Status(sourceMockFail, dbMock)
+	if err == nil {
+		t.Fatal(`TestSetupFail function should fail but it is not`)
+	}
+}
+
+func TestStatusReadDBFail(t *testing.T) {
+	err := Status(sourceMock, dbMockFail)
+	if err == nil {
+		t.Fatal(`TestSetupFail function should fail but it is not`)
 	}
 }
 

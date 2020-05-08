@@ -2,82 +2,48 @@ package main
 
 import (
 	"dbm/connector"
+	"dbm/filehandler"
 	"dbm/schema"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
-	"path/filepath"
-	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
 // Init generates directory, and all its necessary files
 // for dbm to use later
-func Init(dirname string) {
-	err := os.MkdirAll(filepath.Join(dirname, "src"), 'd')
+func Init(sf filehandler.SourceFormat, dirname string) error {
+	err := sf.GenerateDirectory(dirname)
 	if err != nil {
-		log.Fatalf("Failed generating src directory: %v", err)
-		return
-	}
-
-	c := &schema.Conf{
-		Dialect:  "postgresql/mysql/mariadb",
-		Host:     "Host of your database",
-		Port:     5432,
-		Database: "Database to be written to",
-		Username: "username to use",
-		Password: "Password of the username",
-		Sslmode:  "Whether to use ssl",
-	}
-	d, err := yaml.Marshal(&c)
-	if err != nil {
-		log.Fatalf("Failed generating conf.yaml content: %v", err)
-		return
-	}
-
-	err = ioutil.WriteFile(
-		filepath.Join(dirname, "conf.yaml"),
-		[]byte(string(d)), 0700)
-	if err != nil {
-		log.Fatalf("Failed creating conf.yaml file: %v", err)
-		return
+		log.Printf("Failed generating dbm directory: %v", err)
+		return err
 	}
 
 	log.Println("Successfully generate dbm directory")
+	return nil
 }
 
-// Generate creates a yaml file, that includes generated Up and Down attributes
+// GenerateSrcfile creates a yaml file, that includes generated Up and Down attributes
 // Expected to be called on the same level as "src/" folder
-func Generate(filename string) {
-	s := schema.Srcfile{
-		Up:   "Add feature, such as table, index, etc",
-		Down: `To retract the result of "Up"`,
-	}
-	d, err := yaml.Marshal(&s)
+func GenerateSrcfile(sf filehandler.SourceFormat, filename string) error {
+	err := sf.GenerateSrcfile(filename)
 	if err != nil {
-		log.Fatalf("Failed generating srcfile %s: %v", filename, err)
-		return
+		log.Printf("Failed Generating src file: %v", err)
+		return err
 	}
 
-	filename = fmt.Sprintf(
-		"%d-%s.yaml",
-		int32(time.Now().Unix()),
-		filename)
-
-	err = ioutil.WriteFile(
-		filepath.Join("src", filename),
-		[]byte(string(d)), 0700)
-	if err != nil {
-		log.Fatalf("Failed creating conf.yaml file: %v", err)
-	}
+	return nil
 }
 
 // Setup initiate logs table/store
 // for dbm to track what has been up-ed and what has not
-func Setup(db connector.DbAccess) {
-	db.CreateLogTable()
+func Setup(db connector.DbAccess) error {
+	err := db.CreateLogTable()
+	if err != nil {
+		log.Printf("Failed generating log table: %v", err)
+		return err
+	}
+	return nil
 }
 
 // taken from
@@ -93,28 +59,27 @@ func stringInSlice(a string, list []string) bool {
 
 // Status check the statuses of all files
 // in src directory
-func Status(db connector.DbAccess) {
-	files, err := ioutil.ReadDir("src")
+func Status(sf filehandler.SourceFormat, db connector.DbAccess) error {
+	files, err := sf.ReadFromSrcDir()
 	if err != nil {
-		log.Fatalf("Failed reading src directory: %v", err)
-		return
+		log.Printf("Failed reading src directory: %v", err)
+		return err
 	}
 
 	alreadyUp, err := db.ListAlreadyUp()
 	if err != nil {
-		log.Fatalf("Failed retrieving logs from db: %v", err)
-		return
+		log.Printf("Failed retrieving logs from db: %v", err)
+		return err
 	}
 
 	for _, f := range files {
-		var status string
-		if stringInSlice(f.Name(), alreadyUp) {
-			status = "up"
-		} else {
+		status := "up"
+		if !stringInSlice(f, alreadyUp) {
 			status = "down"
 		}
-		log.Printf("%s : %s", f.Name(), status)
+		log.Printf("%s : %s", f, status)
 	}
+	return nil
 }
 
 // taken from
@@ -129,7 +94,7 @@ func readYamlFileFromSrcDir(filename string) (*schema.Srcfile, error) {
 	s := &schema.Srcfile{}
 	err = yaml.Unmarshal(yamlFile, s)
 	if err != nil {
-		log.Fatalf("Failed Unmarshalling %s: %v", filename, err)
+		log.Printf("Failed Unmarshalling %s: %v", filename, err)
 		return nil, err
 	}
 
@@ -141,13 +106,13 @@ func readYamlFileFromSrcDir(filename string) (*schema.Srcfile, error) {
 func Up(db connector.DbAccess, filename string) {
 	files, err := ioutil.ReadDir("src")
 	if err != nil {
-		log.Fatalf("Failed reading src directory: %v", err)
+		log.Printf("Failed reading src directory: %v", err)
 		return
 	}
 
 	alreadyUp, err := db.ListAlreadyUp()
 	if err != nil {
-		log.Fatalf("Failed retrieving logs from db: %v", err)
+		log.Printf("Failed retrieving logs from db: %v", err)
 		return
 	}
 
@@ -175,7 +140,7 @@ func Up(db connector.DbAccess, filename string) {
 		db.BlindExec(s.Up)
 		db.InsertLogs([]string{filename})
 	} else {
-		log.Fatalf("File not found: %v", err)
+		log.Printf("File not found: %v", err)
 	}
 }
 
@@ -184,7 +149,7 @@ func Up(db connector.DbAccess, filename string) {
 func Down(db connector.DbAccess, filename string) {
 	alreadyUp, err := db.ListAlreadyUp()
 	if err != nil {
-		log.Fatalf("Failed retrieving logs from db: %v", err)
+		log.Printf("Failed retrieving logs from db: %v", err)
 		return
 	}
 
@@ -204,6 +169,6 @@ func Down(db connector.DbAccess, filename string) {
 		db.BlindExec(s.Down)
 		db.DeleteLog(filename)
 	} else {
-		log.Fatalf("File not found in logs: %v", err)
+		log.Printf("File not found in logs: %v", err)
 	}
 }
