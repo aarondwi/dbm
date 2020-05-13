@@ -9,7 +9,8 @@ before_script:
   - docker-compose -f docker-compose.test.yml up -d
 
 script: 
-  - sudo go test ./...
+  - chmod 777 . # allow current dir to be executed
+  - go test ./...
 
 after_script:
   - docker-compose -f docker-compose.test.yml down
