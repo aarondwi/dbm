@@ -1,5 +1,7 @@
 language: go
 
+sudo: required
+
 services:
   - docker
 
@@ -7,7 +9,7 @@ before_script:
   - docker-compose -f docker-compose.test.yml up -d
 
 script: 
-  - go test ./...
+  - sudo go test ./...
 
 after_script:
   - docker-compose -f docker-compose.test.yml down
