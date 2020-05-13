@@ -2,6 +2,10 @@ language: go
 
 sudo: required
 
+branches:
+  only:
+    - master
+
 services:
   - docker
 
@@ -9,8 +13,10 @@ before_script:
   - docker-compose -f docker-compose.test.yml up -d
 
 script: 
-  - chmod 777 . # allow current dir to be executed
-  - go test ./...
+  - chmod 777 . # allow current dir to be executed, written to, anything
+  - GO_EXECUTABLE_PATH=$(which go)
+  - echo $GO_EXECUTABLE_PATH
+  - sudo $GO_EXECUTABLE_PATH test ./...
 
 after_script:
   - docker-compose -f docker-compose.test.yml down
