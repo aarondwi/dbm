@@ -1,8 +1,9 @@
 package main
 
 import (
-	"dbm/schema"
 	"errors"
+
+	"github.com/aarondwi/dbm/schema"
 )
 
 // dummyDB is used for mocking DbAccess interface only

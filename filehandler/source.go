@@ -1,13 +1,14 @@
 package filehandler
 
 import (
-	"dbm/schema"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/aarondwi/dbm/schema"
 
 	"gopkg.in/yaml.v2"
 )

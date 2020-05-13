@@ -1,10 +1,11 @@
 package main
 
 import (
-	"dbm/connector"
-	"dbm/filehandler"
 	"errors"
 	"log"
+
+	"github.com/aarondwi/dbm/connector"
+	"github.com/aarondwi/dbm/filehandler"
 )
 
 // Init generates directory, and all its necessary files

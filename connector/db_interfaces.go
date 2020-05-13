@@ -1,7 +1,7 @@
 package connector
 
 import (
-	"dbm/schema"
+	"github.com/aarondwi/dbm/schema"
 )
 
 // DbAccess is the main interface for our database

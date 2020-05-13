@@ -1,7 +1,7 @@
 package filehandler
 
 import (
-	"dbm/schema"
+	"github.com/aarondwi/dbm/schema"
 )
 
 // SourceFormat is the main interface

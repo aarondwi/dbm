@@ -2,10 +2,11 @@ package connector
 
 import (
 	"database/sql"
-	"dbm/schema"
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/aarondwi/dbm/schema"
 
 	// this module directly use postgres
 	_ "github.com/lib/pq"

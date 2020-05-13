@@ -1,4 +1,4 @@
-module dbm
+module github.com/aarondwi/dbm
 
 go 1.13
 

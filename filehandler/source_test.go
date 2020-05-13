@@ -1,7 +1,6 @@
 package filehandler
 
 import (
-	"dbm/schema"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -9,6 +8,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/aarondwi/dbm/schema"
 
 	"gopkg.in/yaml.v2"
 )

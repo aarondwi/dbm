@@ -1,9 +1,10 @@
 package connector
 
 import (
-	"dbm/schema"
 	"os"
 	"testing"
+
+	"github.com/aarondwi/dbm/schema"
 )
 
 var db DbPostgres
