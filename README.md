@@ -1,5 +1,6 @@
 # dbm
 ORM-style database-schema migration tools, minus the ORM bloats
+[![Build Status](https://travis-ci.org/aarondwi/dbm.svg?branch=master)](https://travis-ci.org/aarondwi/dbm)
 
 Why?
 --------------------------
