@@ -3,10 +3,14 @@ ORM-style database-schema migration tools, minus the ORM bloats
 
 [![Build Status](https://travis-ci.org/aarondwi/dbm.svg?branch=master)](https://travis-ci.org/aarondwi/dbm)
 
+Status: Not Yet Ready
+
 Why?
 --------------------------
-I am persoanlly not a fan of ORM tools, IMO that increase bloats without any benefits.
+I am personally not a fan of ORM tools, IMO that increase bloats without any benefits.
 But the migration tool model is really nice. Easy to both track and version controlled.
 So I made this. Provide usual goodies of ORM database-schema migration, without the ORM
 
-Status: Not Yet Ready
+Usage
+--------------------------
+See `dbm help`

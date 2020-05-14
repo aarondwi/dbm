@@ -12,4 +12,5 @@ type SourceFormat interface {
 	GenerateSrcfile(filename string) error
 	ReadSrcfileContent(filename string) (*schema.Srcfile, error)
 	ReadFromSrcDir() ([]string, error)
+	ReadConfigFile() (*schema.Conf, error)
 }

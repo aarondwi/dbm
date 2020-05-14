@@ -107,3 +107,22 @@ func (source *Source) GenerateSrcfile(filename string) error {
 	}
 	return nil
 }
+
+// ReadConfigFile reads conf.yaml file
+// to get the database connection settings
+func (source *Source) ReadConfigFile() (*schema.Conf, error) {
+	yamlFile, err := ioutil.ReadFile("conf.yaml")
+	if err != nil {
+		log.Printf("Failed reading database setting: %v", err)
+		return nil, err
+	}
+
+	s := &schema.Conf{}
+	err = yaml.Unmarshal(yamlFile, s)
+	if err != nil {
+		log.Printf("Failed Unmarshalling conf.yal: %v", err)
+		return nil, err
+	}
+
+	return s, nil
+}

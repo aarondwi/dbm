@@ -9,7 +9,9 @@ import (
 // dummyDB is used for mocking DbAccess interface only
 type dummyDB struct{}
 
-func (d *dummyDB) Init(conf schema.Conf)       {}
+func (d *dummyDB) Init(conf schema.Conf) error {
+	return nil
+}
 func (d *dummyDB) BlindExec(stmt string) error { return nil }
 func (d *dummyDB) CreateLogTable() error       { return nil }
 func (d *dummyDB) DropLogTable() error         { return nil }
@@ -25,7 +27,9 @@ func (d *dummyDB) Close() {}
 
 type dummyDBFail struct{}
 
-func (d *dummyDBFail) Init(conf schema.Conf) {}
+func (d *dummyDBFail) Init(conf schema.Conf) error {
+	return errors.New("some errors for test")
+}
 func (d *dummyDBFail) BlindExec(stmt string) error {
 	return errors.New("some errors for test")
 }
@@ -62,6 +66,16 @@ func (d *dummySource) ReadSrcfileContent(filename string) (*schema.Srcfile, erro
 func (d *dummySource) ReadFromSrcDir() ([]string, error) {
 	return []string{"somefile", "anotherfile"}, nil
 }
+func (d *dummySource) ReadConfigFile() (*schema.Conf, error) {
+	return &schema.Conf{
+		Dialect:  "test",
+		Host:     "test",
+		Port:     1000,
+		Username: "test",
+		Password: "test",
+		Database: "test",
+		Sslmode:  "test"}, nil
+}
 
 type dummySourceFail struct{}
 
@@ -77,6 +91,9 @@ func (d *dummySourceFail) ReadSrcfileContent(filename string) (*schema.Srcfile, 
 func (d *dummySourceFail) ReadFromSrcDir() ([]string, error) {
 	return nil, errors.New("some error for test")
 }
+func (d *dummySourceFail) ReadConfigFile() (*schema.Conf, error) {
+	return nil, errors.New("some error for test")
+}
 
 type dummySourceFailOnReadSrc struct{}
 
@@ -87,4 +104,7 @@ func (d *dummySourceFailOnReadSrc) ReadSrcfileContent(filename string) (*schema.
 }
 func (d *dummySourceFailOnReadSrc) ReadFromSrcDir() ([]string, error) {
 	return []string{"somefile", "anotherfile"}, nil
+}
+func (d *dummySourceFailOnReadSrc) ReadConfigFile() (*schema.Conf, error) {
+	return nil, errors.New("some error for test")
 }

@@ -115,6 +115,52 @@ func TestReadSrcfileContentFail(t *testing.T) {
 	}
 }
 
+func TestReadConfigfileContent(t *testing.T) {
+	s := &schema.Conf{
+		Dialect:  "test",
+		Host:     "test",
+		Port:     1000,
+		Username: "test",
+		Password: "test",
+		Database: "test",
+		Sslmode:  "test"}
+	d, _ := yaml.Marshal(&s)
+	ioutil.WriteFile("conf.yaml", []byte(string(d)), 0700)
+	defer os.Remove("conf.yaml")
+
+	result := &schema.Conf{}
+	result, err := source.ReadConfigFile()
+	if err != nil {
+		t.Fatalf("Failed reading config: %v", err)
+	}
+	if result.Dialect != "test" ||
+		result.Host != "test" ||
+		result.Port != 1000 ||
+		result.Username != "test" ||
+		result.Password != "test" ||
+		result.Database != "test" ||
+		result.Sslmode != "test" {
+		t.Fatalf(
+			"The Content is different: \n"+
+				"Expected: \n%v\n"+
+				"Received: \n%v\n", s, result)
+	}
+}
+
+func TestReadConfigfileContentFail(t *testing.T) {
+	_, err := source.ReadConfigFile()
+	if err == nil {
+		t.Fatalf("should fail because file not exist, but it is not")
+	}
+
+	ioutil.WriteFile("conf.yaml", []byte(string("<html/>")), 0700)
+	defer os.Remove("conf.yaml")
+	_, err = source.ReadConfigFile()
+	if err == nil {
+		t.Fatalf("should fail because not a yaml file")
+	}
+}
+
 func TestReadFromSrcDir(t *testing.T) {
 	dirname := "src"
 	os.Mkdir(dirname, 'd')
