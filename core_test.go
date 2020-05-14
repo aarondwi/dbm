@@ -36,6 +36,28 @@ func TestGenerateSrcfile(t *testing.T) {
 	}
 }
 
+func TestReadConfigFile(t *testing.T) {
+	result, err := ReadConfigFile(sourceMock)
+	if err != nil {
+		t.Fatalf("ReadConfigFile failed: %v,", err)
+	}
+	if result.Dialect != "test" ||
+		result.Host != "test" ||
+		result.Port != 1000 ||
+		result.Username != "test" ||
+		result.Password != "test" ||
+		result.Database != "test" ||
+		result.Sslmode != "test" {
+		t.Fatalf(
+			"The Content is different: %v", result)
+	}
+
+	result, err = ReadConfigFile(sourceMockFail)
+	if err == nil {
+		t.Fatal(`TestReadConfigFile with mockFail should fail but it is not`)
+	}
+}
+
 func TestSetup(t *testing.T) {
 	err := Setup(dbMock)
 	if err != nil {
@@ -44,7 +66,7 @@ func TestSetup(t *testing.T) {
 
 	err = Setup(dbMockFail)
 	if err == nil {
-		t.Fatal(`TestSetupFail function should fail but it is not`)
+		t.Fatal(`TestSetup with mockFail should fail but it is not`)
 	}
 }
 

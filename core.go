@@ -2,10 +2,12 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/aarondwi/dbm/connector"
 	"github.com/aarondwi/dbm/filehandler"
+	"github.com/aarondwi/dbm/schema"
 )
 
 // Init generates directory, and all its necessary files
@@ -30,6 +32,16 @@ func GenerateSrcfile(sf filehandler.SourceFormat, filename string) error {
 		return err
 	}
 	return nil
+}
+
+// ReadConfigFile read and parse the conf.yaml file
+func ReadConfigFile(sf filehandler.SourceFormat) (*schema.Conf, error) {
+	r, err := sf.ReadConfigFile()
+	if err != nil {
+		log.Printf("Failed reading conf.yaml: %v", err)
+		return nil, err
+	}
+	return r, nil
 }
 
 // Setup initiate logs table/store
@@ -74,7 +86,7 @@ func Status(sf filehandler.SourceFormat, db connector.DbAccess) error {
 		if !stringInSlice(f, alreadyUp) {
 			status = "down"
 		}
-		log.Printf("%s : %s", f, status)
+		fmt.Printf("%s : %s\n", f, status)
 	}
 	return nil
 }
@@ -138,7 +150,7 @@ func Down(sf filehandler.SourceFormat, db connector.DbAccess, filename string) e
 			return err
 		}
 		db.BlindExec(s.Down)
-		db.DeleteLog(filename)
+		db.DeleteLog(targetFilename)
 	} else if stringInSlice(filename, alreadyUp) {
 		s, err := sf.ReadSrcfileContent(filename)
 		if err != nil {
