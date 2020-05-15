@@ -1,2 +1,2 @@
-1. use CI build tools (probably travis)
+1. decide where to print all the error message (to make it consistent)
 2. specify more specific error message for file error
