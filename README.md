@@ -2,6 +2,8 @@
 ORM-style database-schema migration tools, minus the ORM bloats
 
 [![Build Status](https://travis-ci.org/aarondwi/dbm.svg?branch=master)](https://travis-ci.org/aarondwi/dbm)
+[![Go Report Card](https://goreportcard.com/badge/github.com/aarondwi/dbm)](https://goreportcard.com/report/github.com/aarondwi/dbm)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Why?
 --------------------------
@@ -38,9 +40,7 @@ dbm generate DummyName
 ```
 It will add a file in `src` directory in the format `{UNIXSECONDS}-DummyName.yaml`. The file has `up` and `down` attributes, which you gonna set to whatever the need is.
 
-> Up is mostly for applying, such as *CREATE TABLE*, *ADD INDEX*, etc\n
-> Down is mostly for removing, such as *DROP TABLE*, *DROP INDEX*, etc\n
-> Of course, definition of applying and removing may vary, depending on the case
+Up is mostly for applying, such as *CREATE TABLE*, *ADD INDEX*, etc. Down is mostly for removing, such as *DROP TABLE*, *DROP INDEX*, etc. Of course, definition of applying and removing may vary, depending on the case
 
 > Note that, a *srcfile* is only for one thing, for example *CREATE TABLE*. If you need another table, or wanna add > index to existing, you can create another *srcfile*
 

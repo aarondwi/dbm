@@ -142,7 +142,7 @@ func TestDown(t *testing.T) {
 
 	err = Down(sourceMock, dbMock, "anotherfile")
 	if err == nil {
-		t.Fatalf("TestDown with filename 'anotherfile' should fail beacuse it has not been applied but it is not")
+		t.Fatalf("TestDown with filename 'anotherfile' should fail because it has not been applied but it is not")
 	}
 
 	err = Down(sourceMock, dbMock, "notfound")
